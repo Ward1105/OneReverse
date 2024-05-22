@@ -1,72 +1,15 @@
-------------------------
-Connection from ::1
-------------------------
-Message from client: hi
-------------------------
-Total bytes delivered: 96915
-------------------------
-------------------------
-Connection from ::1
-------------------------
-Message from client: hi
-------------------------
-Total bytes delivered: 155610
-------------------------
-------------------------
-Connection from ::1
-------------------------
-Message from client: hi
-------------------------
-Total bytes delivered: 170625
-------------------------
-------------------------
-Connection from ::1
-------------------------
+
 ------------------------
 Response from GET request:
-HTTP/1.1 200 OK
-Date: Wed, 22 May 2024 20:12:05 GMT
-Content-Type: application/json; charset=utf-8
-Content-Length: 58
-Access-Control-Allow-Origin: *
-X-Ttl: 21
-X-Rl: 43
-Connection: keep-alive
-
-{"status":"fail","message":"reserved range","query":"::1"}
-------------------------
-Message from client: hi
-------------------------
-Total bytes delivered: 212940
-------------------------
-------------------------
-Connection from ::1
-------------------------
-Message from client: hi
-------------------------
-Total bytes delivered: 173355
-------------------------
-------------------------
-Connection from ::1
-------------------------
-Message from client: hi
-------------------------
-Total bytes delivered: 58695
-------------------------
-------------------------
-Connection from ::1
-------------------------
-------------------------
-Response from GET request:
-HTTP/1.1 200 OK
-Date: Wed, 22 May 2024 20:20:08 GMT
-Content-Type: application/json; charset=utf-8
-Content-Length: 286
-Access-Control-Allow-Origin: *
-X-Ttl: 19
-X-Rl: 43
-Connection: keep-alive
-
+HTTP/1.1 200 OK
+Date: Wed, 22 May 2024 20:20:08 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 286
+Access-Control-Allow-Origin: *
+X-Ttl: 19
+X-Rl: 43
+Connection: keep-alive
+
 {"status":"success","country":"Belgium","countryCode":"BE","region":"BRU","regionName":"Brussels Capital","city":"Brussels","zip":"1080","lat":50.8511,"lon":4.3132,"timezone":"Europe/Brussels","isp":"Orange Belgium SA","org":"","as":"AS47377 Orange Belgium SA","query":"178.51.123.169"}
 ------------------------
 Message from client: hi
