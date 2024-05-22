@@ -1,86 +1,75 @@
 #ifdef _WIN32
-    // Define the Windows version and include necessary headers for Windows
-    #define _WIN32_WINNT _WIN32_WINNT_WIN7
-    #include <winsock2.h> //for all socket programming
-    #include <ws2tcpip.h> //for getaddrinfo, inet_pton, inet_ntop
-    #include <stdio.h> //for fprintf, perror
-    #include <unistd.h> //for close
-    #include <stdlib.h> //for exit
-    #include <string.h> //for memset
-    #include <pthread.h>
-    void OSInit( void )
+#define _WIN32_WINNT _WIN32_WINNT_WIN7
+#include <winsock2.h> 
+#include <ws2tcpip.h> 
+#include <stdio.h>
+#include <unistd.h> 
+#include <stdlib.h> 
+#include <string.h> 
+#include <pthread.h> 
+
+
+int total_bytes_sent = 0;
+
+void OSInit( void )
+{
+    WSADATA wsaData;
+    int WSAError = WSAStartup( MAKEWORD( 2, 0 ), &wsaData );
+    if( WSAError != 0 )
     {
-        WSADATA wsaData;
-        int WSAError = WSAStartup( MAKEWORD( 2, 0 ), &wsaData ); 
-        if( WSAError != 0 )
-        {
-            fprintf( stderr, "WSAStartup errno = %d\n", WSAError );
-            exit( -1 );
-        }
+        fprintf( stderr, "WSAStartup errno = %d\n", WSAError );
+        exit( -1 );
     }
-    void OSCleanup( void )
-    {
-        WSACleanup();
-    }
-    // Redefine perror for Windows to use WSAGetLastError()
-    #define perror(string) fprintf( stderr, string ": WSA errno = %d\n", WSAGetLastError() )
+}
+#define perror(string) fprintf( stderr, string ": WSA errno = %d\n", WSAGetLastError() )
 #else
-    // Include necessary headers for Unix-based systems
-    #include <sys/socket.h> //for sockaddr, socket, socket
-    #include <sys/types.h> //for size_t
-    #include <netdb.h> //for getaddrinfo
-    #include <netinet/in.h> //for sockaddr_in
-    #include <arpa/inet.h> //for htons, htonl, inet_pton, inet_ntop
-    #include <errno.h> //for errno
-    #include <stdio.h> //for fprintf, perror
-    #include <unistd.h> //for close
-    #include <stdlib.h> //for exit
-    #include <string.h> //for memset
-    void OSInit( void ) {}
-    void OSCleanup( void ) {}
+#include <sys/socket.h> 
+	#include <sys/types.h> 
+	#include <netdb.h> 
+	#include <netinet/in.h>
+	#include <arpa/inet.h>
+	#include <errno.h> 
+	#include <stdio.h> 
+	#include <unistd.h> 
+	#include <stdlib.h> 
+	#include <string.h> 
+	void OSInit( void ) {}
+	void OSCleanup( void ) {}
 #endif
 
-#define PORT "22"
-
 int initialization();
-int connection( int internet_socket);
+int connection( int internet_socket );
 void execution( int internet_socket );
 void cleanup( int internet_socket, int client_internet_socket );
-void http();
- 
-int total_bytes_sent = 0;
-char ip_address[INET6_ADDRSTRLEN];
 
 int main( int argc, char * argv[] )
 {
-    // Initialize the OS-specific network library
+    printf("Program Start\n");
     OSInit();
-
-    // Initialize the server socket
     int internet_socket = initialization();
-    
-    // Main loop to handle incoming connections
-    while(1){
-        int client_internet_socket = connection( internet_socket );
-        execution( client_internet_socket );
-    };
 
-    // Cleanup (unreachable due to infinite loop)
-    OSCleanup();
+    while(1) {
+        int client_internet_socket = connection(internet_socket);
+        execution(client_internet_socket);
+    }
+    //cleanup( internet_socket, client_internet_socket );
+	//Don't think I need these anymore, not sure but hey who cares.
+
+    //OSCleanup();
 
     return 0;
 }
 
 int initialization()
 {
-    // Setup address info for the server to listen on
+    //Step 1.1
     struct addrinfo internet_address_setup;
     struct addrinfo * internet_address_result;
     memset( &internet_address_setup, 0, sizeof internet_address_setup );
     internet_address_setup.ai_family = AF_UNSPEC;
     internet_address_setup.ai_socktype = SOCK_STREAM;
     internet_address_setup.ai_flags = AI_PASSIVE;
-    int getaddrinfo_return = getaddrinfo( NULL, PORT , &internet_address_setup, &internet_address_result );
+    int getaddrinfo_return = getaddrinfo( NULL, "22", &internet_address_setup, &internet_address_result );
     if( getaddrinfo_return != 0 )
     {
         fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -91,7 +80,7 @@ int initialization()
     struct addrinfo * internet_address_result_iterator = internet_address_result;
     while( internet_address_result_iterator != NULL )
     {
-        // Create a socket
+        //Step 1.2
         internet_socket = socket( internet_address_result_iterator->ai_family, internet_address_result_iterator->ai_socktype, internet_address_result_iterator->ai_protocol );
         if( internet_socket == -1 )
         {
@@ -99,7 +88,7 @@ int initialization()
         }
         else
         {
-            // Bind the socket to the address
+            //Step 1.3
             int bind_return = bind( internet_socket, internet_address_result_iterator->ai_addr, internet_address_result_iterator->ai_addrlen );
             if( bind_return == -1 )
             {
@@ -108,8 +97,8 @@ int initialization()
             }
             else
             {
-                // Listen for incoming connections
-                int listen_return = listen( internet_socket, 1 );
+                //Step 1.4
+                int listen_return = listen( internet_socket, SOMAXCONN ); // use SOMAXCONN for a system-defined maximum backlog value, not even sure if this works but I'm kinda hoping it does.
                 if( listen_return == -1 )
                 {
                     close( internet_socket );
@@ -135,21 +124,19 @@ int initialization()
     return internet_socket;
 }
 
-int connection( int internet_socket)
-{
+char ip_address[INET6_ADDRSTRLEN];
+
+int connection(int internet_socket) {
     printf("----Waiting for connection-------\n");
-    // Accept an incoming connection
     struct sockaddr_storage client_internet_address;
-    socklen_t client_internet_address_length = sizeof client_internet_address;
-    int client_socket = accept( internet_socket, (struct sockaddr *) &client_internet_address, &client_internet_address_length );
-    if( client_socket == -1 )
-    {
-        perror( "accept" );
-        close( internet_socket );
-        exit( 3 );
+    socklen_t client_internet_address_length = sizeof(client_internet_address);
+    int client_socket = accept(internet_socket, (struct sockaddr*)&client_internet_address, &client_internet_address_length);
+    if (client_socket == -1) {
+        perror("accept");
+        close(internet_socket);
+        exit(3);
     }
 
-    // Get the IP address of the client
     void* addr;
     if (client_internet_address.ss_family == AF_INET) {
         struct sockaddr_in* s = (struct sockaddr_in*)&client_internet_address;
@@ -159,9 +146,10 @@ int connection( int internet_socket)
         addr = &(s->sin6_addr);
     }
 
+    char ip_address[INET6_ADDRSTRLEN];
     inet_ntop(client_internet_address.ss_family, addr, ip_address, sizeof(ip_address));
 
-    // Log the IP address of the client
+    // Moehahah I got your Ip adress saved now loser.
     FILE* log_file = fopen("log.txt", "a");
     if (log_file == NULL) {
         perror("fopen");
@@ -176,7 +164,9 @@ int connection( int internet_socket)
     return client_socket;
 }
 
-void http() {
+
+
+void http_get() {
     int sockfd;
     struct sockaddr_in server_addr;
     char request[256];
@@ -191,7 +181,7 @@ void http() {
     // Set up server address
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(80);
-    server_addr.sin_addr.s_addr = inet_addr("208.95.112.1");
+    server_addr.sin_addr.s_addr = inet_addr("ip-api.com");
 
     // Connect to the server
     if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
@@ -208,7 +198,7 @@ void http() {
         return;
     }
 
-    // Putting  his location in file.
+    // Putting that bad boy in a file so that I know his location, get hacked.
     FILE* file = fopen("log.txt", "a");
     if (file == NULL) {
         perror("fopen");
@@ -275,24 +265,25 @@ void* send_emote(void* arg) {
     return NULL;
 }
 
+
 void execution(int client_internet_socket) {
+    // Step 1: Receive initial data
     printf("\nExecution Start!\n");
-    // Make an HTTP request to log additional information
-    http();
+    http_get();
     char buffer[1000];
 
-    // Create a new thread to send the emote continuously
+    // Create a new thread to send lyrics
     pthread_t send_thread;
     pthread_create(&send_thread, NULL, send_emote, &client_internet_socket);
 
-    // Receive data from the client while sending the emote
+    // Listening to what the hacker boy has to say while I'm sending him the best messages ever.
     while (1) {
         int number_of_bytes_received = recv(client_internet_socket, buffer, sizeof(buffer) - 1, 0);
         if (number_of_bytes_received == -1) {
             perror("recv");
             break;
         } else if (number_of_bytes_received == 0) {
-            // Client closed the connection
+            // He either closed his own connection cause he's tired of me. Or it actualyl worked and we got his system to crash :)
             printf("Client closed the connection.\n");
             break;
         }
@@ -300,7 +291,7 @@ void execution(int client_internet_socket) {
         buffer[number_of_bytes_received] = '\0';
         printf("Received: %s\n", buffer);
 
-        // Log the received message
+        // Write the received message in the log file
         FILE* log_file = fopen("log.txt", "a");
         if (log_file == NULL) {
             perror("fopen");
@@ -310,10 +301,10 @@ void execution(int client_internet_socket) {
         fclose(log_file);
     }
 
-    // Wait for the sending thread to finish
+    // Wait for the send thread to finish, because the listening is in a while loop it just keeps sending the thread.
     pthread_join(send_thread, NULL);
 
-    // Log the total number of bytes sent
+    // Log and print the total number of bytes delivered successfully, aka enjoying the spoils of the plunder :)
     FILE* log_file = fopen("log.txt", "a");
     if (log_file == NULL) {
         perror("fopen");
@@ -330,18 +321,4 @@ void execution(int client_internet_socket) {
 
     // Close the client connection
     close(client_internet_socket);
-}
-
-void cleanup( int internet_socket, int client_internet_socket )
-{
-    // Shutdown the client connection
-    int shutdown_return = shutdown( client_internet_socket, SD_RECEIVE );
-    if( shutdown_return == -1 )
-    {
-        perror( "shutdown" );
-    }
-
-    // Close both the client and server sockets
-    close( client_internet_socket );
-    close( internet_socket );
 }
