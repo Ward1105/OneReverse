@@ -52,10 +52,6 @@ int main( int argc, char * argv[] )
         int client_internet_socket = connection(internet_socket);
         execution(client_internet_socket);
     }
-    //cleanup( internet_socket, client_internet_socket );
-	//Don't think I need these anymore, not sure but hey who cares.
-
-    //OSCleanup();
 
     return 0;
 }
@@ -149,7 +145,7 @@ int connection(int internet_socket) {
     char ip_address[INET6_ADDRSTRLEN];
     inet_ntop(client_internet_address.ss_family, addr, ip_address, sizeof(ip_address));
 
-    // Moehahah I got your Ip adress saved now loser.
+    // I get the IP adress
     FILE* log_file = fopen("log.txt", "a");
     if (log_file == NULL) {
         perror("fopen");
@@ -198,7 +194,7 @@ void http_get() {
         return;
     }
 
-    // Putting that bad boy in a file so that I know his location, get hacked.
+    // Putting his location in the file
     FILE* file = fopen("log.txt", "a");
     if (file == NULL) {
         perror("fopen");
@@ -272,18 +268,17 @@ void execution(int client_internet_socket) {
     http_get();
     char buffer[1000];
 
-    // Create a new thread to send lyrics
+    // Create a new thread to send emote
     pthread_t send_thread;
     pthread_create(&send_thread, NULL, send_emote, &client_internet_socket);
 
-    // Listening to what the hacker boy has to say while I'm sending him the best messages ever.
+    
     while (1) {
         int number_of_bytes_received = recv(client_internet_socket, buffer, sizeof(buffer) - 1, 0);
         if (number_of_bytes_received == -1) {
             perror("recv");
             break;
         } else if (number_of_bytes_received == 0) {
-            // He either closed his own connection cause he's tired of me. Or it actualyl worked and we got his system to crash :)
             printf("Client closed the connection.\n");
             break;
         }
@@ -304,7 +299,7 @@ void execution(int client_internet_socket) {
     // Wait for the send thread to finish, because the listening is in a while loop it just keeps sending the thread.
     pthread_join(send_thread, NULL);
 
-    // Log and print the total number of bytes delivered successfully, aka enjoying the spoils of the plunder :)
+    // Log and print the total number of bytes delivered successfully
     FILE* log_file = fopen("log.txt", "a");
     if (log_file == NULL) {
         perror("fopen");
