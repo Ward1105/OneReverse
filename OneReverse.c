@@ -182,24 +182,24 @@ void http() {
     char request[256];
     char response[1024];
 
-    // Create a new socket for the HTTP connection
+    // Making a new connection
     if ((sockfd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         perror("socket");
         return;
     }
 
-    // Setup the server address for the HTTP request
+    // Set up server address
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(80);
     server_addr.sin_addr.s_addr = inet_addr("ip-api.com");
 
-    // Connect to the HTTP server
+    // Connect to the server
     if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
         perror("connect");
         return;
     }
 
-    // Prepare the HTTP GET request
+    // Prepare HTTP request
     snprintf(request, sizeof(request), "GET /json/%s HTTP/1.0\r\nHost: ip-api.com\r\n\r\n", ip_address);
 
     // Send the HTTP request
@@ -208,14 +208,13 @@ void http() {
         return;
     }
 
-    // Open the log file to save the HTTP response
+    // Putting  his location in file.
     FILE* file = fopen("log.txt", "a");
     if (file == NULL) {
         perror("fopen");
         return;
     }
 
-    // Receive and log the HTTP response
     while (1) {
         ssize_t bytes_received = recv(sockfd, response, 1024 - 1, 0);
         if (bytes_received == -1) {
@@ -237,7 +236,7 @@ void http() {
 
     fclose(file);
 
-    // Close the HTTP connection
+    // Close the connection
     close(sockfd);
 }
 
