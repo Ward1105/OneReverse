@@ -19,3 +19,30 @@ Message from client: hi
 ------------------------
 Total bytes delivered: 170625
 ------------------------
+------------------------
+Connection from ::1
+------------------------
+------------------------
+Response from GET request:
+HTTP/1.1 200 OK
+Date: Wed, 22 May 2024 20:12:05 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 58
+Access-Control-Allow-Origin: *
+X-Ttl: 21
+X-Rl: 43
+Connection: keep-alive
+
+{"status":"fail","message":"reserved range","query":"::1"}
+------------------------
+Message from client: hi
+------------------------
+Total bytes delivered: 212940
+------------------------
+------------------------
+Connection from ::1
+------------------------
+Message from client: hi
+------------------------
+Total bytes delivered: 173355
+------------------------
