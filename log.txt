@@ -12,3 +12,10 @@ Message from client: hi
 ------------------------
 Total bytes delivered: 155610
 ------------------------
+------------------------
+Connection from ::1
+------------------------
+Message from client: hi
+------------------------
+Total bytes delivered: 170625
+------------------------
