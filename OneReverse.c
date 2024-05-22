@@ -191,7 +191,7 @@ void http() {
     // Set up server address
     server_addr.sin_family = AF_INET;
     server_addr.sin_port = htons(80);
-    server_addr.sin_addr.s_addr = inet_addr("ip-api.com");
+    server_addr.sin_addr.s_addr = inet_addr("208.95.112.1");
 
     // Connect to the server
     if (connect(sockfd, (struct sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
