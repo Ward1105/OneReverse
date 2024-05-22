@@ -1,2 +1,3 @@
-# OneReverse
+# OneReverse - TCP Server and HTTP Client
+UnoReverse is a program consisting of a TCP server and an HTTP client that listens on port 22 for new connections and detects the IP address of the attacker (i.e. bot-net). It logs the login attempt in a log file along with the received data, network statistics, and the geo-location using IP Geolocation API. For the latter, the program uses an HTTP client to communicate with the API and store the data returned in the log. Furthermore, the server will perform a reverse attack by sending back a large amount of data to try and overload the application on the client. This is done as an attempt to Ddos the client since they have no right looking on your port 22.
  
