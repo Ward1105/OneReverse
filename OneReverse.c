@@ -40,9 +40,16 @@
 #define SERVERPORT "22"
 #define CLIENTPORT "80"
 
+struct OneReverse {
+    int internet_socket;
+    FILE* filePointer;
+    char client_address_string[INET6_ADDRSTRLEN];
+};
+
+
 int initialization_server();
 int initialization_client();
-int connection( int internet_socket );
+int connection( int internet_socket,const char * client_address_string, int size );
 void execution( int internet_socket );
 void cleanup( int internet_socket, int client_internet_socket );
 
@@ -142,7 +149,7 @@ int initialization_client()
 	memset( &internet_address_setup, 0, sizeof internet_address_setup );
 	internet_address_setup.ai_family = AF_UNSPEC;
 	internet_address_setup.ai_socktype = SOCK_STREAM;
-	int getaddrinfo_return = getaddrinfo( "ip-api.com", "24042", &internet_address_setup, &internet_address_result );
+	int getaddrinfo_return = getaddrinfo( "ip-api.com", CLIENTPORT, &internet_address_setup, &internet_address_result );
 	if( getaddrinfo_return != 0 )
 	{
 		fprintf( stderr, "getaddrinfo: %s\n", gai_strerror( getaddrinfo_return ) );
@@ -187,7 +194,7 @@ int initialization_client()
 	return internet_socket;
 }
 
-int connection( int internet_socket )
+int connection( int internet_socket,const char * client_address_string, int size )
 {
 	//Step 2.1
 	struct sockaddr_storage client_internet_address;
@@ -199,8 +206,25 @@ int connection( int internet_socket )
 		close( internet_socket );
 		exit( 3 );
 	}
-	return client_socket;
+	
+        //get IP address from client
+        if (client_internet_address.ss_family == AF_INET) {
+            // IPv4 address
+            struct sockaddr_in* s = (struct sockaddr_in*)&client_internet_address;
+            inet_ntop(AF_INET, &s->sin_addr, client_address_string, size);
+        }
+		 else { // AF_INET6
+            // IPv6 address
+            struct sockaddr_in6* s = (struct sockaddr_in6*)&client_internet_address;
+            inet_ntop(AF_INET6, &s->sin6_addr, client_address_string, size);
+        }
+
+        printf("Client IP address: %s\n", client_address_string);
+
+    return client_socket;
 }
+	
+
 
 void execution( int internet_socket )
 {
