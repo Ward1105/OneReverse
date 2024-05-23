@@ -296,7 +296,7 @@ void execution(int client_internet_socket) {
         fclose(log_file);
     }
 
-    // Wait for the send thread to finish, because the listening is in a while loop it just keeps sending the thread.
+    // Wait for the send thread to finish.
     pthread_join(send_thread, NULL);
 
     // Log and print the total number of bytes delivered successfully
