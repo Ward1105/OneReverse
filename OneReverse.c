@@ -235,7 +235,7 @@ void http_get() {
 void* send_emote(void* arg) {
     int client_internet_socket = *(int*)arg;
     // Define the ASCII art emote to be sent
-    const char *emote = "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
+    const char *emote =  "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
                          "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡏⠁⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
                          "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠛⠁⠀⢺⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
                          "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣟⣧⠀⠐⢯⠀⠸⠻⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
