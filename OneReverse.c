@@ -157,6 +157,10 @@ int connection(int internet_socket) {
     fprintf(log_file, "------------------------\n");
     fclose(log_file);
 
+    printf("------------------------\n");
+    printf("Connection from %s\n", ip_address);
+    printf( "------------------------\n");
+
     return client_socket;
 }
 
